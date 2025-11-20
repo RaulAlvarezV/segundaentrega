@@ -1,15 +1,17 @@
+
 let productos = [
     { id: 1, tipo: "Café Brasil", precio: 4500 },
     { id: 2, tipo: "Café Colombia", precio: 5000 },
     { id: 3, tipo: "Café Perú", precio: 4800 }
 ];
 
-let clientes = [
-    { id: 1, nombre: "Juan Perez", pedidos: [] },
-    { id: 2, nombre: "Ana Martinez", pedidos: [] },
-];
+let clientes = [];
 
 let carritodecompras = [];
+
+
+
+// mostrarProductos()
 
 
 const contenedorProductos = document.getElementById("contenedordeproductos");
@@ -27,6 +29,10 @@ function mostrarProductos() {
     });
 }
 mostrarProductos();
+
+
+
+// agregarAlCarrito(), mostrarCarrito(), quitarDelCarrito()
 
 
 const contenedorCarrito = document.getElementById("contenedor_carrito");
@@ -56,6 +62,10 @@ function quitarDelCarrito(indice) {
 }
 
 
+
+// mostrarClientes(), agregarCliente()
+
+
 const contenedorClientes = document.getElementById("clientes-list");
 
 function mostrarClientes() {
@@ -63,7 +73,10 @@ function mostrarClientes() {
 
     clientes.forEach((cliente) => {
         contenedorClientes.innerHTML += `
-            <li class="list-group-item">${cliente.id}. ${cliente.nombre}</li>
+            <li class="list-group-item">
+                <strong>${cliente.id}. ${cliente.nombre}</strong><br>
+                Total: $${cliente.total}
+            </li>
         `;
     });
 }
@@ -75,65 +88,94 @@ const formCliente = document.getElementById("form_agregar_cliente");
 formCliente.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    let nuevoNombre = document.getElementById("cliente_nombre").value;
+    if (carritodecompras.length === 0) {
+        alert("El carrito está vacío. Agregá productos antes de asignar un cliente.");
+        return;
+    }
+
+    let nuevoNombre = document.getElementById("cliente_nombre").value.trim();
+
+    if (nuevoNombre === "") {
+        alert("Debe ingresar un nombre.");
+        return;
+    }
+
+    let totalPedido = carritodecompras.reduce((acc, p) => acc + p.precio, 0);
 
     clientes.push({
         id: clientes.length + 1,
         nombre: nuevoNombre,
-        
-        pedidos: []
+        pedidos: [...carritodecompras],
+        total: totalPedido
     });
 
-    mostrarClientes();
-    formCliente.reset();
-});
-
-function seleccionarCliente() {
-    let lista = clientes.map(c => `${c.id}. ${c.nombre}`).join("\n");
-    let seleccion = prompt("Seleccione cliente:\n" + lista);
-
-    let cliente = clientes.find(c => c.id == seleccion);
-
-    if (!cliente) {
-        alert("Cliente inválido");
-        return null;
-    }
-
-    
-    carritodecompras.forEach(productos => {
-        cliente.pedidos.push({
-            producto: productos.tipo,
-            precio: productos.precio
-        });
-    });
-
-    
     carritodecompras = [];
     mostrarCarrito();
+    mostrarClientes();
+    formCliente.reset();
 
-    alert(`Se agregaron ${cliente.pedidos.length} pedidos al cliente ${cliente.nombre}`);
+    alert("Cliente agregado con su pedido.");
+});
 
-    return cliente;
-}
+
+
+// verOrdenesDePedido()
 
 
 const contenedorPedidos = document.getElementById("contenedor_pedidos");
 
-function actualizarContenedorPedidos() {
-    let cliente = seleccionarCliente();
-    if (!cliente) return;
+function verOrdenesDePedido() {
+    contenedorPedidos.innerHTML = "<h2>Órdenes de Pedido</h2>";
 
-    contenedorPedidos.innerHTML = `<h2>Pedidos de ${cliente.nombre}</h2>`;
+    if (clientes.length === 0) {
+        contenedorPedidos.innerHTML += "<p>No hay clientes aún.</p>";
+        return;
+    }
 
-    cliente.pedidos.forEach((p, i) => {
-        contenedorPedidos.innerHTML += `<p>${i + 1}. ${p.producto} - $${p.precio}</p>`;
+    clientes.forEach((cliente) => {
+        contenedorPedidos.innerHTML += `
+            <h4>${cliente.nombre} (Total: $${cliente.total})</h4>
+        `;
+
+        cliente.pedidos.forEach((p, i) => {
+            contenedorPedidos.innerHTML += `
+                <p>${i + 1}. ${p.tipo} - $${p.precio}</p>
+            `;
+        });
+
+        contenedorPedidos.innerHTML += `<hr>`;
     });
 }
 
-document.getElementById("btnSeleccionarCliente").addEventListener("click", seleccionarCliente);
+
+
+// confirmarPedidos()
+
+
+function confirmarPedidos() {
+    let salida = "FACTURAS GENERADAS:\n\n";
+
+    clientes.forEach(cliente => {
+        salida += `Cliente: ${cliente.nombre}\n`;
+        cliente.pedidos.forEach(p => {
+            salida += ` - ${p.tipo} $${p.precio}\n`;
+        });
+        salida += `TOTAL FACTURADO: $${cliente.total}\n\n`;
+    });
+
+    alert(salida);
+}
+
+
+// Botones y eventos
+
+
 document.getElementById("btnQuitarCarrito").addEventListener("click", () => {
-    let indice = prompt("Producto a quitar:");
+    let indice = prompt("Indique el número de producto a quitar:");
     quitarDelCarrito(indice - 1);
 });
-document.getElementById("btnMostrarPedidos").addEventListener("click", actualizarContenedorPedidos);
 
+document.getElementById("contenedor_pedidos").addEventListener("click", verOrdenesDePedido);
+
+document.getElementById("btnSeleccionarCliente").innerText = "Confirmar Pedidos";
+document.getElementById("btnSeleccionarCliente").addEventListener("click", confirmarPedidos);

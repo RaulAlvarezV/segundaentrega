@@ -13,7 +13,7 @@
 
 <body>
 
-  <h1 class="text-center mt-3">Agenda de Clientes - Órdenes de Pedido</h1>
+  <h1 class="text-center mt-3">Órdenes y Facturación de Pedido</h1>
 
   <div class="container">
 
@@ -21,28 +21,6 @@
       <div class="col-md-6">
         <h2>Productos</h2>
         <div id="contenedordeproductos" class="row"></div>
-      </div>
-
-      <div class="col-md-6">
-        <h2>Listado de Clientes</h2>
-        <ul id="clientes-list" class="list-group"></ul>
-      </div>
-    </div>
-
-    <div class="row mt-4">
-
-      <div class="col-md-6">
-        <h2>Carrito de compras</h2>
-
-        <div id="contenedor_carrito"></div>
-
-
-        <button id="btnSeleccionarCliente" class="btn btn-secondary mt-2 w-100">Seleccionar Cliente</button>
-
-        <button id="btnQuitarCarrito" class="btn btn-warning mt-2 w-100">Quitar producto del carrito</button>
-
-        <button id="btnMostrarPedidos" class="btn btn-info mt-2 w-100">Ver Órdenes de Pedido</button>
-
       </div>
 
       <div class="col-md-6">
@@ -56,17 +34,27 @@
           <button type="submit" class="btn btn-primary w-100">Agregar Cliente</button>
 
         </form>
+
+        <h2>Carrito de compras</h2>
+
+        <div id="contenedor_carrito"></div>
+
+
+        <button id="btnSeleccionarCliente" class="btn btn-secondary mt-2 w-100">Seleccionar Cliente</button>
+
+        <button id="btnQuitarCarrito" class="btn btn-warning mt-2 w-100">Quitar producto del carrito</button>
+
+        <button id="contenedor_pedidos" class="btn btn-info mt-2 w-100">Ver Órdenes de Pedido</button>
+
+        
+
+
       </div>
-
-    </div>
-
-    <div class="row mt-4">
-      <div class="col-md-12">
-        <div id="contenedor_pedidos"></div>
+      <div class="col-md-6">
+        <h2>Listado de Clientes</h2>
+        <ul id="clientes-list" class="list-group"></ul>
       </div>
     </div>
-
-  </div>
 
 </body>
 </html>
