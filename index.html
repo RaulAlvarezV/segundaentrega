@@ -17,83 +17,49 @@
 
   <div class="container">
 
-    <!-- ------------------- -->
-    <!-- PRODUCTOS + CLIENTES -->
-    <!-- ------------------- -->
-
     <div class="row mt-4">
-
-      <!-- Productos -->
       <div class="col-md-6">
         <h2>Productos</h2>
         <div id="contenedordeproductos" class="row"></div>
       </div>
 
-      <!-- Clientes -->
       <div class="col-md-6">
         <h2>Listado de Clientes</h2>
         <ul id="clientes-list" class="list-group"></ul>
       </div>
-
     </div>
-
-
-    <!-- ------------------- -->
-    <!-- CARRITO + AGREGAR CLIENTES -->
-    <!-- ------------------- -->
 
     <div class="row mt-4">
 
-      <!-- Carrito -->
       <div class="col-md-6">
         <h2>Carrito de compras</h2>
 
         <div id="contenedor_carrito"></div>
 
-        <button id="vaciar-carrito" class="btn btn-danger mt-3">Vaciar carrito</button>
 
-        <button id="btn-seleccionar-cliente" class="btn btn-secondary mt-2 w-100">
-          Seleccionar Cliente
-        </button>
+        <button id="btnSeleccionarCliente" class="btn btn-secondary mt-2 w-100">Seleccionar Cliente</button>
 
-        <button id="btn-quitar-del-carrito" class="btn btn-warning mt-2 w-100">
-          Quitar producto del carrito
-        </button>
+        <button id="btnQuitarCarrito" class="btn btn-warning mt-2 w-100">Quitar producto del carrito</button>
 
-        <button id="btn-ver-pedidos" class="btn btn-info mt-2 w-100">
-          Ver Órdenes de Pedido
-        </button>
+        <button id="btnMostrarPedidos" class="btn btn-info mt-2 w-100">Ver Órdenes de Pedido</button>
+
       </div>
 
-
-      <!-- Agregar Cliente -->
       <div class="col-md-6">
         <h2>Agregar Cliente</h2>
 
-        <form id="agregarclienteform" class="p-3 border rounded bg-light">
+        <form id="form_agregar_cliente" class="p-3 border rounded bg-light">
 
           <label class="form-label">Nombre:</label>
-          <input type="text" id="nombre" class="form-control mb-2">
+          <input type="text" id="cliente_nombre" class="form-control mb-2">
 
-          <label class="form-label">CUIT:</label>
-          <input type="text" id="cuit" class="form-control mb-2">
-
-          <label class="form-label">Teléfono:</label>
-          <input type="text" id="telefono" class="form-control mb-2">
-
-          <button id="agregarcliente" type="submit" class="btn btn-primary w-100">
-            Agregar Cliente
-          </button>
+          <button type="submit" class="btn btn-primary w-100">Agregar Cliente</button>
 
         </form>
       </div>
 
     </div>
 
-
-    <!-- ------------------- -->
-    <!-- PEDIDOS DE CLIENTE -->
-    <!-- ------------------- -->
     <div class="row mt-4">
       <div class="col-md-12">
         <div id="contenedor_pedidos"></div>

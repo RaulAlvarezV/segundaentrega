@@ -1,7 +1,3 @@
-// ---------------------------
-// ARRAYS PRINCIPALES
-// ---------------------------
-
 let productos = [
     { id: 1, tipo: "Café Brasil", precio: 4500 },
     { id: 2, tipo: "Café Colombia", precio: 5000 },
@@ -16,30 +12,22 @@ let clientes = [
 let carritodecompras = [];
 
 
-// ---------------------------
-// MOSTRAR PRODUCTOS EN CARDS
-// ---------------------------
-
-const contenedorProductos = document.getElementById("contenedor_productos");
+const contenedorProductos = document.getElementById("contenedordeproductos");
 
 function mostrarProductos() {
     contenedorProductos.innerHTML = "";
     productos.forEach((producto) => {
         contenedorProductos.innerHTML += `
-            <div class="card">
+            <div class="card p-3 m-2">
                 <h3>${producto.tipo}</h3>
                 <p>Precio: $${producto.precio}</p>
-                <button class="btn" onclick="agregarAlCarrito(${producto.id})">Agregar al carrito</button>
+                <button class="btn btn-primary" onclick="agregarAlCarrito(${producto.id})">Agregar al carrito</button>
             </div>
         `;
     });
 }
 mostrarProductos();
 
-
-// ---------------------------
-// CARRITO
-// ---------------------------
 
 const contenedorCarrito = document.getElementById("contenedor_carrito");
 
@@ -50,7 +38,7 @@ function agregarAlCarrito(idProducto) {
 }
 
 function mostrarCarrito() {
-    contenedorCarrito.innerHTML = "<h2>Carrito</h2>";
+    contenedorCarrito.innerHTML = "";
 
     carritodecompras.forEach((prod, index) => {
         contenedorCarrito.innerHTML += `<p>${index + 1}. ${prod.tipo} - $${prod.precio}</p>`;
@@ -61,32 +49,26 @@ function mostrarCarrito() {
 }
 
 function quitarDelCarrito(indice) {
-    carritodecompras.splice(indice, 1);
-    mostrarCarrito();
+    if (indice >= 0 && indice < carritodecompras.length) {
+        carritodecompras.splice(indice, 1);
+        mostrarCarrito();
+    }
 }
 
 
-// ---------------------------
-// LISTADO CLIENTES
-// ---------------------------
-
-const contenedorClientes = document.getElementById("listado_clientes");
+const contenedorClientes = document.getElementById("clientes-list");
 
 function mostrarClientes() {
-    contenedorClientes.innerHTML = "<h2>Clientes</h2>";
+    contenedorClientes.innerHTML = "";
 
-    clientes.forEach((cliente, index) => {
+    clientes.forEach((cliente) => {
         contenedorClientes.innerHTML += `
-            <p>${cliente.id}. ${cliente.nombre}</p>
+            <li class="list-group-item">${cliente.id}. ${cliente.nombre}</li>
         `;
     });
 }
 mostrarClientes();
 
-
-// ---------------------------
-// FORM PARA AGREGAR CLIENTES
-// ---------------------------
 
 const formCliente = document.getElementById("form_agregar_cliente");
 
@@ -95,98 +77,63 @@ formCliente.addEventListener("submit", (e) => {
 
     let nuevoNombre = document.getElementById("cliente_nombre").value;
 
-    let nuevoCliente = {
+    clientes.push({
         id: clientes.length + 1,
         nombre: nuevoNombre,
+        
         pedidos: []
-    };
+    });
 
-    clientes.push(nuevoCliente);
     mostrarClientes();
     formCliente.reset();
 });
 
-
-// ---------------------------
-// SELECCIONAR CLIENTE (PROMPT)
-// ---------------------------
-
 function seleccionarCliente() {
     let lista = clientes.map(c => `${c.id}. ${c.nombre}`).join("\n");
+    let seleccion = prompt("Seleccione cliente:\n" + lista);
 
-    let clienteSeleccionado = prompt(
-        "Ingrese el número del cliente:\n\n" + lista
-    );
-
-    let cliente = clientes.find(c => c.id == clienteSeleccionado);
+    let cliente = clientes.find(c => c.id == seleccion);
 
     if (!cliente) {
-        alert("Número inválido.");
+        alert("Cliente inválido");
         return null;
     }
+
+    
+    carritodecompras.forEach(productos => {
+        cliente.pedidos.push({
+            producto: productos.tipo,
+            precio: productos.precio
+        });
+    });
+
+    
+    carritodecompras = [];
+    mostrarCarrito();
+
+    alert(`Se agregaron ${cliente.pedidos.length} pedidos al cliente ${cliente.nombre}`);
 
     return cliente;
 }
 
 
-// ---------------------------
-// AGREGAR PEDIDO A CLIENTE
-// ---------------------------
-
-function agregarPedidoACliente() {
-    const cliente = seleccionarCliente();
-    if (!cliente) return;
-
-    const listaProductos = productos.map(p => `${p.id}. ${p.tipo}`).join("\n");
-    const productoElegido = prompt("Seleccione el producto:\n\n" + listaProductos);
-
-    let producto = productos.find(p => p.id == productoElegido);
-    if (!producto) return alert("Producto inválido");
-
-    cliente.pedidos.push({ producto: producto.tipo, precio: producto.precio });
-
-    alert(`Pedido agregado a ${cliente.nombre}`);
-}
-
-
-// ---------------------------
-// MOSTRAR PEDIDOS DEL CLIENTE
-// ---------------------------
-
 const contenedorPedidos = document.getElementById("contenedor_pedidos");
 
 function actualizarContenedorPedidos() {
-    const cliente = seleccionarCliente();
+    let cliente = seleccionarCliente();
     if (!cliente) return;
 
-    contenedorPedidos.innerHTML = `<h2>Órdenes de Pedido de ${cliente.nombre}</h2>`;
+    contenedorPedidos.innerHTML = `<h2>Pedidos de ${cliente.nombre}</h2>`;
 
-    cliente.pedidos.forEach((pedido, index) => {
-        contenedorPedidos.innerHTML += `
-            <p>${index + 1}. ${pedido.producto} - $${pedido.precio}</p>
-        `;
+    cliente.pedidos.forEach((p, i) => {
+        contenedorPedidos.innerHTML += `<p>${i + 1}. ${p.producto} - $${p.precio}</p>`;
     });
 }
 
-
-// ---------------------------
-// EVENTOS DE LOS BOTONES
-// ---------------------------
-
-document.getElementById("btnSeleccionarCliente").addEventListener("click", () => {
-    const cliente = seleccionarCliente();
-    if (cliente) alert("Cliente seleccionado: " + cliente.nombre);
-});
-
+document.getElementById("btnSeleccionarCliente").addEventListener("click", seleccionarCliente);
 document.getElementById("btnQuitarCarrito").addEventListener("click", () => {
-    const indice = prompt("Ingrese el número del producto a quitar:");
+    let indice = prompt("Producto a quitar:");
     quitarDelCarrito(indice - 1);
 });
+document.getElementById("btnMostrarPedidos").addEventListener("click", actualizarContenedorPedidos);
 
-document.getElementById("btnMostrarPedidos").addEventListener("click", () => {
-    actualizarContenedorPedidos();
-});
-
-document.getElementById("btnAgregarPedido").addEventListener("click", () => {
-    agregarPedidoACliente();
-});
