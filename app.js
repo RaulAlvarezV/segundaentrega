@@ -199,11 +199,5 @@ document.getElementById("btnSeleccionarCliente").innerText = "Confirmar Pedidos"
 document.getElementById("btnSeleccionarCliente").addEventListener("click", confirmarPedidos);
 
 document.getElementById("vaciarcarrito").addEventListener("click", () => {
-    carritodecompras = [];
     localStorage.clear();
-    mostrarCarrito();
-    console.log(carritostorage);
 });
-
-
-
