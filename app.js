@@ -200,4 +200,5 @@ document.getElementById("btnSeleccionarCliente").addEventListener("click", confi
 
 document.getElementById("vaciarcarrito").addEventListener("click", () => {
     localStorage.clear();
+    location.reload();
 });
