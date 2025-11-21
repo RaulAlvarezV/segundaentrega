@@ -9,7 +9,7 @@ let clientes = [];
 
 let carritodecompras = [];
 
-
+const carritostorage = JSON.parse(localStorage.getItem("pedidos")) || [];
 
 // mostrarProductos()
 
@@ -36,6 +36,11 @@ mostrarProductos();
 
 
 const contenedorCarrito = document.getElementById("contenedor_carrito");
+
+if (localStorage.getItem("pedidos">=0)) {
+    carritodecompras = JSON.parse(localStorage.getItem("carrito"));
+    mostrarCarrito();
+}
 
 function agregarAlCarrito(idProducto) {
     let producto = productos.find(p => p.id === idProducto);
@@ -80,7 +85,13 @@ function mostrarClientes() {
         `;
     });
 }
+
+if (carritostorage.length > 0) {
+    clientes = carritostorage;
+    mostrarClientes();
+}
 mostrarClientes();
+
 
 
 const formCliente = document.getElementById("form_agregar_cliente");
@@ -118,7 +129,6 @@ formCliente.addEventListener("submit", (e) => {
 });
 
 
-
 // verOrdenesDePedido()
 
 
@@ -144,7 +154,10 @@ function verOrdenesDePedido() {
         });
 
         contenedorPedidos.innerHTML += `<hr>`;
+
     });
+
+    
 }
 
 
@@ -153,17 +166,21 @@ function verOrdenesDePedido() {
 
 
 function confirmarPedidos() {
-    let salida = "FACTURAS GENERADAS:\n\n";
+    let pedidoconfirm = "FACTURAS GENERADAS:\n\n";
 
     clientes.forEach(cliente => {
-        salida += `Cliente: ${cliente.nombre}\n`;
+        pedidoconfirm += `Cliente: ${cliente.nombre}\n`;
         cliente.pedidos.forEach(p => {
-            salida += ` - ${p.tipo} $${p.precio}\n`;
+            pedidoconfirm += ` - ${p.tipo} $${p.precio}\n`;
         });
-        salida += `TOTAL FACTURADO: $${cliente.total}\n\n`;
+        pedidoconfirm += `TOTAL FACTURADO: $${cliente.total}\n\n`;
     });
 
-    alert(salida);
+    localStorage.setItem("pedidos", JSON.stringify(clientes));
+
+
+
+    alert(pedidoconfirm);
 }
 
 
@@ -178,4 +195,8 @@ document.getElementById("btnQuitarCarrito").addEventListener("click", () => {
 document.getElementById("contenedor_pedidos").addEventListener("click", verOrdenesDePedido);
 
 document.getElementById("btnSeleccionarCliente").innerText = "Confirmar Pedidos";
+
 document.getElementById("btnSeleccionarCliente").addEventListener("click", confirmarPedidos);
+
+
+
