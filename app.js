@@ -10,7 +10,7 @@ const contenedorCarrito = document.getElementById("contenedor_carrito");
 const contenedorClientes = document.getElementById("clientes-list");
 const pedidosDisplay = document.getElementById("pedidos_display");
 
-// Load products from JSON "database"
+
 async function cargarProductos() {
     try {
         const res = await fetch("products.json");
@@ -35,7 +35,7 @@ function mostrarProductos() {
         contenedorProductos.appendChild(card);
     });
 
-    // attach listeners for add-to-cart
+   
     document.querySelectorAll('.add-to-cart').forEach(btn => {
         btn.addEventListener('click', () => {
             const id = parseInt(btn.getAttribute('data-id'), 10);
@@ -43,8 +43,7 @@ function mostrarProductos() {
         });
     });
 }
-
-// Persist cart
+// Carrito de compras
 function guardarCarrito() {
     localStorage.setItem('carrito', JSON.stringify(carritodecompras));
 }
@@ -90,7 +89,6 @@ function mostrarCarrito() {
     contenedorCarrito.appendChild(list);
     contenedorCarrito.appendChild(totalEl);
 
-    // attach remove listeners
     document.querySelectorAll('.remove-item').forEach(btn => {
         btn.addEventListener('click', () => {
             const idx = parseInt(btn.getAttribute('data-index'), 10);
@@ -126,7 +124,7 @@ function mostrarClientes() {
         contenedorClientes.appendChild(li);
     });
 
-    // attach pay listeners for clientes list
+    
     document.querySelectorAll('.pay-order').forEach(btn => {
         btn.addEventListener('click', () => {
             const id = parseInt(btn.getAttribute('data-id'), 10);
@@ -206,10 +204,10 @@ function pagarPedido(clienteId) {
     const idx = clientes.findIndex(c => c.id === clienteId);
     if (idx === -1) return;
 
-    // Remove the cliente (mark as paid by removing from pending orders)
+    
     const [pago] = clientes.splice(idx, 1);
 
-    // Clear any session cart and persist changes
+    
     carritodecompras = [];
     guardarCarrito();
     localStorage.setItem('pedidos', JSON.stringify(clientes));
@@ -240,7 +238,7 @@ function confirmarPedidos() {
     Swal.fire({ title: 'Facturas', text: pedidoconfirm, icon: 'success', width: 600 });
 }
 
-// Buttons and events
+
 document.getElementById('btnSeleccionarCliente').innerText = 'Confirmar Pedidos';
 document.getElementById('btnSeleccionarCliente').addEventListener('click', confirmarPedidos);
 
