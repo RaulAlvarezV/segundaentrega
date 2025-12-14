@@ -1,0 +1,5 @@
+[
+  { "id": 1, "tipo": "Café Brasil", "precio": 4500 },
+  { "id": 2, "tipo": "Café Colombia", "precio": 5000 },
+  { "id": 3, "tipo": "Café Perú", "precio": 4800 }
+]

@@ -1,204 +1,267 @@
 
-let productos = [
-    { id: 1, tipo: "Café Brasil", precio: 4500 },
-    { id: 2, tipo: "Café Colombia", precio: 5000 },
-    { id: 3, tipo: "Café Perú", precio: 4800 }
-];
+let productos = [];
 
 let clientes = [];
 
 let carritodecompras = [];
 
-const carritostorage = JSON.parse(localStorage.getItem("pedidos")) || [];
-
-// mostrarProductos()
-
-
 const contenedorProductos = document.getElementById("contenedordeproductos");
+const contenedorCarrito = document.getElementById("contenedor_carrito");
+const contenedorClientes = document.getElementById("clientes-list");
+const pedidosDisplay = document.getElementById("pedidos_display");
+
+// Load products from JSON "database"
+async function cargarProductos() {
+    try {
+        const res = await fetch("products.json");
+        if (!res.ok) throw new Error("No se pudo cargar products.json");
+        productos = await res.json();
+        mostrarProductos();
+    } catch (err) {
+        Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudieron cargar los productos.' });
+    }
+}
 
 function mostrarProductos() {
     contenedorProductos.innerHTML = "";
     productos.forEach((producto) => {
-        contenedorProductos.innerHTML += `
-            <div class="card p-3 m-2">
-                <h3>${producto.tipo}</h3>
-                <p>Precio: $${producto.precio}</p>
-                <button class="btn btn-primary" onclick="agregarAlCarrito(${producto.id})">Agregar al carrito</button>
-            </div>
+        const card = document.createElement('div');
+        card.className = 'card p-3 m-2';
+        card.innerHTML = `
+            <h3>${producto.tipo}</h3>
+            <p>Precio: $${producto.precio}</p>
+            <button class="btn btn-primary add-to-cart" data-id="${producto.id}">Agregar al carrito</button>
         `;
+        contenedorProductos.appendChild(card);
+    });
+
+    // attach listeners for add-to-cart
+    document.querySelectorAll('.add-to-cart').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = parseInt(btn.getAttribute('data-id'), 10);
+            agregarAlCarrito(id);
+        });
     });
 }
-mostrarProductos();
 
+// Persist cart
+function guardarCarrito() {
+    localStorage.setItem('carrito', JSON.stringify(carritodecompras));
+}
 
-
-// agregarAlCarrito(), mostrarCarrito(), quitarDelCarrito()
-
-
-const contenedorCarrito = document.getElementById("contenedor_carrito");
-
-if (localStorage.getItem("pedidos">=0)) {
-    carritodecompras = JSON.parse(localStorage.getItem("carrito"));
+function cargarCarrito() {
+    const saved = JSON.parse(localStorage.getItem('carrito')) || [];
+    carritodecompras = saved;
     mostrarCarrito();
 }
 
 function agregarAlCarrito(idProducto) {
-    let producto = productos.find(p => p.id === idProducto);
+    const producto = productos.find(p => p.id === idProducto);
+    if (!producto) return;
     carritodecompras.push(producto);
+    guardarCarrito();
     mostrarCarrito();
+    Swal.fire({ icon: 'success', title: 'Agregado', text: `${producto.tipo} agregado al carrito.` });
 }
 
 function mostrarCarrito() {
-    contenedorCarrito.innerHTML = "";
+    contenedorCarrito.innerHTML = '';
 
+    if (carritodecompras.length === 0) {
+        contenedorCarrito.innerHTML = '<p>El carrito está vacío.</p>';
+        return;
+    }
+
+    const list = document.createElement('div');
     carritodecompras.forEach((prod, index) => {
-        contenedorCarrito.innerHTML += `<p>${index + 1}. ${prod.tipo} - $${prod.precio}</p>`;
+        const item = document.createElement('div');
+        item.className = 'd-flex justify-content-between align-items-center mb-2';
+        item.innerHTML = `
+            <div>${index + 1}. ${prod.tipo} - $${prod.precio}</div>
+            <div><button class="btn btn-sm btn-danger remove-item" data-index="${index}">Quitar</button></div>
+        `;
+        list.appendChild(item);
     });
 
-    let total = carritodecompras.reduce((acc, item) => acc + item.precio, 0);
-    contenedorCarrito.innerHTML += `<h3>Total: $${total}</h3>`;
+    const total = carritodecompras.reduce((acc, item) => acc + item.precio, 0);
+    const totalEl = document.createElement('h3');
+    totalEl.textContent = `Total: $${total}`;
+
+    contenedorCarrito.appendChild(list);
+    contenedorCarrito.appendChild(totalEl);
+
+    // attach remove listeners
+    document.querySelectorAll('.remove-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.getAttribute('data-index'), 10);
+            quitarDelCarrito(idx);
+        });
+    });
 }
 
 function quitarDelCarrito(indice) {
     if (indice >= 0 && indice < carritodecompras.length) {
-        carritodecompras.splice(indice, 1);
+        const removed = carritodecompras.splice(indice, 1)[0];
+        guardarCarrito();
         mostrarCarrito();
+        Swal.fire({ icon: 'info', title: 'Eliminado', text: `${removed.tipo} eliminado del carrito.` });
     }
 }
 
-
-
-// mostrarClientes(), agregarCliente()
-
-
-const contenedorClientes = document.getElementById("clientes-list");
-
+// Clientes
 function mostrarClientes() {
-    contenedorClientes.innerHTML = "";
-
+    contenedorClientes.innerHTML = '';
+    if (clientes.length === 0) return;
     clientes.forEach((cliente) => {
-        contenedorClientes.innerHTML += `
-            <li class="list-group-item">
-                <strong>${cliente.id}. ${cliente.nombre}</strong><br>
-                Total: $${cliente.total}
-            </li>
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+        li.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div><strong>${cliente.id}. ${cliente.nombre}</strong><br>Total: $${cliente.total}</div>
+                <div>
+                    <button class="btn btn-sm btn-success pay-order" data-id="${cliente.id}">Pagar</button>
+                </div>
+            </div>
         `;
+        contenedorClientes.appendChild(li);
+    });
+
+    // attach pay listeners for clientes list
+    document.querySelectorAll('.pay-order').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = parseInt(btn.getAttribute('data-id'), 10);
+            pagarPedido(id);
+        });
     });
 }
 
-if (carritostorage.length > 0) {
-    clientes = carritostorage;
+function cargarClientes() {
+    clientes = JSON.parse(localStorage.getItem('pedidos')) || [];
     mostrarClientes();
 }
-mostrarClientes();
 
-
-
-const formCliente = document.getElementById("form_agregar_cliente");
-
-formCliente.addEventListener("submit", (e) => {
+const formCliente = document.getElementById('form_agregar_cliente');
+formCliente.addEventListener('submit', (e) => {
     e.preventDefault();
 
     if (carritodecompras.length === 0) {
-        alert("El carrito está vacío. Agregá productos antes de asignar un cliente.");
+        Swal.fire({ icon: 'warning', title: 'Carrito vacío', text: 'Agregá productos antes de asignar un cliente.' });
         return;
     }
 
-    let nuevoNombre = document.getElementById("cliente_nombre").value.trim();
-
-    if (nuevoNombre === "") {
-        alert("Debe ingresar un nombre.");
+    const nuevoNombre = document.getElementById('cliente_nombre').value.trim();
+    if (nuevoNombre === '') {
+        Swal.fire({ icon: 'warning', title: 'Nombre requerido', text: 'Debe ingresar un nombre.' });
         return;
     }
 
-    let totalPedido = carritodecompras.reduce((acc, p) => acc + p.precio, 0);
+    const totalPedido = carritodecompras.reduce((acc, p) => acc + p.precio, 0);
+    clientes.push({ id: clientes.length + 1, nombre: nuevoNombre, pedidos: [...carritodecompras], total: totalPedido });
 
-    clientes.push({
-        id: clientes.length + 1,
-        nombre: nuevoNombre,
-        pedidos: [...carritodecompras],
-        total: totalPedido
-    });
+    localStorage.setItem('pedidos', JSON.stringify(clientes));
 
     carritodecompras = [];
+    guardarCarrito();
     mostrarCarrito();
     mostrarClientes();
     formCliente.reset();
 
-    alert("Cliente agregado con su pedido.");
+    Swal.fire({ icon: 'success', title: 'Cliente agregado', text: 'Cliente agregado con su pedido.' });
 });
 
-
-// verOrdenesDePedido()
-
-
-const contenedorPedidos = document.getElementById("contenedor_pedidos");
-
+// Ver órdenes
 function verOrdenesDePedido() {
-    contenedorPedidos.innerHTML = "<h2>Órdenes de Pedido</h2>";
-
+    pedidosDisplay.innerHTML = '';
     if (clientes.length === 0) {
-        contenedorPedidos.innerHTML += "<p>No hay clientes aún.</p>";
+        pedidosDisplay.innerHTML = '<p>No hay clientes aún.</p>';
         return;
     }
 
     clientes.forEach((cliente) => {
-        contenedorPedidos.innerHTML += `
-            <h4>${cliente.nombre} (Total: $${cliente.total})</h4>
-        `;
+        const cont = document.createElement('div');
+        cont.className = 'mb-3';
+        const title = document.createElement('h4');
+        title.textContent = `${cliente.nombre} (Total: $${cliente.total})`;
+        cont.appendChild(title);
+
+        const payBtn = document.createElement('button');
+        payBtn.className = 'btn btn-sm btn-success mb-2';
+        payBtn.textContent = 'Pagar';
+        payBtn.setAttribute('data-id', cliente.id);
+        payBtn.addEventListener('click', () => pagarPedido(cliente.id));
+        cont.appendChild(payBtn);
 
         cliente.pedidos.forEach((p, i) => {
-            contenedorPedidos.innerHTML += `
-                <p>${i + 1}. ${p.tipo} - $${p.precio}</p>
-            `;
+            const pEl = document.createElement('p');
+            pEl.textContent = `${i + 1}. ${p.tipo} - $${p.precio}`;
+            cont.appendChild(pEl);
         });
 
-        contenedorPedidos.innerHTML += `<hr>`;
-
+        cont.appendChild(document.createElement('hr'));
+        pedidosDisplay.appendChild(cont);
     });
-
-    
 }
 
+function pagarPedido(clienteId) {
+    const idx = clientes.findIndex(c => c.id === clienteId);
+    if (idx === -1) return;
 
+    // Remove the cliente (mark as paid by removing from pending orders)
+    const [pago] = clientes.splice(idx, 1);
 
-// confirmarPedidos()
+    // Clear any session cart and persist changes
+    carritodecompras = [];
+    guardarCarrito();
+    localStorage.setItem('pedidos', JSON.stringify(clientes));
 
+    mostrarCarrito();
+    mostrarClientes();
+    verOrdenesDePedido();
 
+    Swal.fire({ icon: 'success', title: 'Pedido pagado con éxito!', text: 'Gracias por tu compra!' });
+}
+
+// Confirmar pedidos (genera factura)
 function confirmarPedidos() {
-    let pedidoconfirm = "FACTURAS GENERADAS:\n\n";
+    if (clientes.length === 0) {
+        Swal.fire({ icon: 'info', title: 'Sin facturas', text: 'No hay pedidos para confirmar.' });
+        return;
+    }
 
+    let pedidoconfirm = 'FACTURAS GENERADAS:\n\n';
     clientes.forEach(cliente => {
         pedidoconfirm += `Cliente: ${cliente.nombre}\n`;
-        cliente.pedidos.forEach(p => {
-            pedidoconfirm += ` - ${p.tipo} $${p.precio}\n`;
-        });
+        cliente.pedidos.forEach(p => { pedidoconfirm += ` - ${p.tipo} $${p.precio}\n`; });
         pedidoconfirm += `TOTAL FACTURADO: $${cliente.total}\n\n`;
     });
 
-    localStorage.setItem("pedidos", JSON.stringify(clientes));
+    localStorage.setItem('pedidos', JSON.stringify(clientes));
 
-
-
-    alert(pedidoconfirm);
+    Swal.fire({ title: 'Facturas', text: pedidoconfirm, icon: 'success', width: 600 });
 }
 
+// Buttons and events
+document.getElementById('btnSeleccionarCliente').innerText = 'Confirmar Pedidos';
+document.getElementById('btnSeleccionarCliente').addEventListener('click', confirmarPedidos);
 
-// Botones y eventos
+document.getElementById('btnVerPedidos').addEventListener('click', verOrdenesDePedido);
 
-
-document.getElementById("btnQuitarCarrito").addEventListener("click", () => {
-    let indice = prompt("Indique el número de producto a quitar:");
-    quitarDelCarrito(indice - 1);
+document.getElementById('vaciarcarrito').addEventListener('click', () => {
+    Swal.fire({ title: 'Vaciar carrito', text: '¿Desea vaciar el carrito y los pedidos?', icon: 'warning', showCancelButton: true }).then(result => {
+        if (result.isConfirmed) {
+            localStorage.removeItem('carrito');
+            localStorage.removeItem('pedidos');
+            carritodecompras = [];
+            clientes = [];
+            mostrarCarrito();
+            mostrarClientes();
+            pedidosDisplay.innerHTML = '';
+            Swal.fire({ icon: 'success', title: 'Eliminado', text: 'Carrito y pedidos eliminados.' }).then(() => location.reload());
+        }
+    });
 });
 
-document.getElementById("contenedor_pedidos").addEventListener("click", verOrdenesDePedido);
-
-document.getElementById("btnSeleccionarCliente").innerText = "Confirmar Pedidos";
-
-document.getElementById("btnSeleccionarCliente").addEventListener("click", confirmarPedidos);
-
-document.getElementById("vaciarcarrito").addEventListener("click", () => {
-    localStorage.clear();
-    location.reload();
-});
+// Inicialización
+cargarProductos();
+cargarCarrito();
+cargarClientes();
